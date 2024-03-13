@@ -52,7 +52,7 @@ setup(
     python_requires=REQUIRES_PYTHON,
     install_requires=REQUIRED,
     extras_require={
-        'dev': ['coverage', 'flake8', 'pytest'],
+        'dev': ['coverage', 'flake8', 'pytest', 'torchinfo'],
     },
     packages=[p for p in find_packages() if p.startswith('torchclust')],
     # package_data={'torchclust': ['py.typed']},
