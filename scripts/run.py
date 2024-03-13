@@ -5,8 +5,8 @@ import torch.nn as nn
 import torch.optim as optim
 from sklearn.model_selection import train_test_split
 
-from sklearn.cluster import KMeans
 from torch.utils.data import DataLoader
+from torchinfo import summary
 from tqdm import tqdm
 
 # Import des modules STC et AutoEncoder
@@ -14,12 +14,15 @@ from torchclust.modules import STC
 from torchclust.models import AutoEncoder
 from torchclust.metrics import metrics
 from torchclust.data import load_data
+from torchclust.utils import pretrain_autoencoder, self_train
 
 def main(args):
     # Chargement des données
     # Assurez-vous que les données sont chargées sous forme de tenseurs
     x, y = load_data(args.dataset)
-    n_clusters = len(torch.unique(y))
+    n_clusters = len(torch.unique(torch.tensor(y)))
+
+    print("nclusters = ", n_clusters)
 
     # Division des données en ensembles d'entraînement et de test
     X_train, X_test, y_train, y_test = train_test_split(x, y, test_size=0.1, random_state=0)
@@ -29,37 +32,70 @@ def main(args):
     X_test = torch.tensor(X_test, dtype=torch.float)
     y_train = torch.tensor(y_train, dtype=torch.long)
     y_test = torch.tensor(y_test, dtype=torch.long)
+
+    train_loader = DataLoader(torch.utils.data.TensorDataset(X_train, y_train), 
+                                  batch_size=args.batch_size, 
+                                  shuffle=True)
     
     # Création du modèle STC
-    stc = STC(hidden_dims=[X_train.shape[-1], 500, 500, 2000, 20], n_clusters=n_clusters)
+    #print(torch.Tensor(X_train).shape)
+    #print(X_train.shape[-1])
+    #test_ae = AutoEncoder([X_train.shape[-1], 500, 500, 2000, 20])
+    #print(test_ae.encoder(torch.Tensor(X_train)).shape)
+    #summary(test_ae.encoder, torch.Tensor(X_train).shape)
+    stc = STC(hidden_dims=[torch.Tensor(X_train).shape[-1], 500, 500, 2000, 20], n_clusters=n_clusters)
+    #print(stc.autoencoder.encoder(torch.Tensor(X_train)).shape)
+    #print(len(stc.clustering_layer(stc.autoencoder.encoder(torch.Tensor(X_train)))))
+    
 
     # Préentraînement de l'autoencodeur si les poids ne sont pas déjà préentraînés
     if not os.path.exists(args.ae_weights):
+        os.makedirs(os.path.dirname(args.ae_weights), exist_ok=True)
         print("Préentraînement de l'autoencodeur...")
-        autoencoder_optimizer = optim.Adam(stc.autoencoder.parameters())
-        train_loader = DataLoader(torch.utils.data.TensorDataset(X_train, y_train), batch_size=args.batch_size, shuffle=True)
-        stc.pretrain_autoencoder(train_loader, autoencoder_optimizer, args.pretrain_epochs, args.batch_size, args.ae_weights)
+        ae_optimizer = optim.Adam(stc.autoencoder.parameters())
+        ae_criterion = nn.MSELoss()
+        pretrain_autoencoder(stc.autoencoder,
+                             train_loader, 
+                             ae_optimizer, 
+                             ae_criterion,
+                             args.pretrain_epochs, 
+                             args.ae_weights)
     else:
         print("Chargement des poids préentraînés de l'autoencodeur...")
-        stc.autoencoder.load_state_dict(torch.load(args.ae_weights))
+        stc.autoencoder.from_pretrained(args.ae_weights)
 
-    # Initialisation du clustering
-    print("Initialisation du clustering...")
-    stc.soft_clustering(X_train, n_clusters)
+   
+    summary(stc, input_size=torch.Tensor(X_train).shape)
+
+    # Freeze parameters of the decoder
+    for param in stc.autoencoder.decoder.parameters():
+        param.requires_grad = False
 
     # Optimisation de l'encodeur avec le clustering
     print("Optimisation de l'encodeur avec le clustering...")
-    clustering_optimizer = optim.Adam(stc.clustering_layer.parameters())
-    y_pred_train = stc.update_encoder_weights(X_train, y_train, clustering_optimizer, args.maxiter, args.batch_size, args.tol)
+    st_optimizer = optim.Adam(stc.parameters())
+    st_criterion = nn.KLDivLoss(reduction='batchmean')
 
-    # Évaluation du modèle sur l'ensemble de test
-    _, decoded_test = stc(X_test)
-    q_test = stc.clustering_layer(X_test)
-    y_pred_test = torch.argmax(q_test, dim=1)
-    acc_test = metrics.acc(y_test, y_pred_test.numpy())
-    nmi_test = metrics.nmi(y_test, y_pred_test.numpy())
-    print(f"Accuracy on test set: {acc_test:.4f}")
-    print(f"NMI on test set: {nmi_test:.4f}")
+    y_pred_train = self_train(stc,
+                              st_criterion,
+                              st_optimizer,
+                              X_train, 
+                              y_train, 
+                              args.maxiter, 
+                              args.batch_size, 
+                              args.tol,
+                              args.update_interval,
+                              args.save_dir,
+                              rand_seed=0)
+
+    # # Évaluation du modèle sur l'ensemble de test
+    # _, decoded_test = stc(X_test)
+    # q_test = stc.clustering_layer(X_test)
+    # y_pred_test = torch.argmax(q_test, dim=1)
+    # acc_test = metrics.acc(y_test, y_pred_test.numpy())
+    # nmi_test = metrics.nmi(y_test, y_pred_test.numpy())
+    # print(f"Accuracy on test set: {acc_test:.4f}")
+    # print(f"NMI on test set: {nmi_test:.4f}")
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='train',
@@ -72,8 +108,8 @@ if __name__ == "__main__":
     parser.add_argument('--pretrain_epochs', default=15, type=int)
     parser.add_argument('--update_interval', default=30, type=int)
     parser.add_argument('--tol', default=0.0001, type=float)
-    parser.add_argument('--ae_weights', default='/data/search_snippets/results/ae_weights.pth')
-    parser.add_argument('--save_dir', default='/data/search_snippets/results/')
+    parser.add_argument('--ae_weights', default='data/stackoverflow/artefacts/ae_weights.pth')
+    parser.add_argument('--save_dir', default='data/stackoverflow/artefacts/')
     args = parser.parse_args()
 
     # Exécution du programme principal
