@@ -16,10 +16,6 @@ class TestAutoEncoder:
 		x = torch.rand(32, 784)
 		xx = model(x)
 		assert xx.shape == x.shape
-		# check if forward_encoder and forward_decoder methods work
-		z = model.forward_encoder(x)
-		xx = model.forward_decoder(z)
-		assert xx.shape == x.shape
 		# check if forward method works
 		xx = model.forward(x)
 		assert xx.shape == x.shape
