@@ -1,9 +1,13 @@
+from typing import List
+
 import torch
 import torch.nn as nn
 
 class AutoEncoder(torch.nn.Module):
 
-    def __init__(self, hidden_units):
+    def __init__(self, 
+                 hidden_units: List[int]) -> None:
+        
         super(AutoEncoder, self).__init__()
         self.hidden_units = hidden_units
         n_stacks = len(self.hidden_units) - 1
@@ -27,21 +31,12 @@ class AutoEncoder(torch.nn.Module):
         self.encoder = nn.Sequential(*encoder_layers)
         self.decoder = nn.Sequential(*decoder_layers)
         
-    def forward_encoder(self, x):
-        z = self.encoder(x)
-        return z
-    
-    def forward_decoder(self, z):
-        xx = self.decoder(z)
-        return xx
-        
-
-    def forward(self, x):
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
         
         ### ENCODER
-        encoded = self.forward_encoder(x)
+        encoded = self.encoder(x)
         
         ### DECODER
-        decoded = self.forward_decoder(encoded)
+        decoded = self.decoder(encoded)
         
         return decoded
