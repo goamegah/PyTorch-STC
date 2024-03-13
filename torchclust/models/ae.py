@@ -30,7 +30,10 @@ class AutoEncoder(torch.nn.Module):
 
         self.encoder = nn.Sequential(*encoder_layers)
         self.decoder = nn.Sequential(*decoder_layers)
-        
+    
+    def from_pretrained(self, path: str) -> None:
+        self.load_state_dict(torch.load(path))
+
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         
         ### ENCODER
@@ -38,5 +41,5 @@ class AutoEncoder(torch.nn.Module):
         
         ### DECODER
         decoded = self.decoder(encoded)
-        
+    
         return decoded
