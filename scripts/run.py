@@ -7,11 +7,9 @@ from sklearn.model_selection import train_test_split
 
 from torch.utils.data import DataLoader
 from torchinfo import summary
-from tqdm import tqdm
 
 # Import des modules STC et AutoEncoder
 from torchclust.modules import STC
-from torchclust.models import AutoEncoder
 from torchclust.metrics import metrics
 from torchclust.data import load_data
 from torchclust.utils import pretrain_autoencoder, self_train
