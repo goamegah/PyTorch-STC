@@ -28,6 +28,9 @@ class AutoEncoder(torch.nn.Module):
             decoder_layers.append(nn.LeakyReLU())
         decoder_layers.append(nn.Linear(self.hidden_units[1], self.hidden_units[0]))
 
+        #print(encoder_layers)
+        #print(decoder_layers)
+
         self.encoder = nn.Sequential(*encoder_layers)
         self.decoder = nn.Sequential(*decoder_layers)
     
