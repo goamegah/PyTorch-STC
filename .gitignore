@@ -161,9 +161,12 @@ cython_debug/
 
 
 # personal notebook & scripts
-data/
 essai/
 .python-version
 archive/
 *local_scripts
 local_scripts
+/notebooks
+/notes 
+.vscode/
+datasets/
