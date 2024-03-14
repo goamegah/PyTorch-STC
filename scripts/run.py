@@ -106,8 +106,8 @@ if __name__ == "__main__":
     parser.add_argument('--pretrain_epochs', default=15, type=int)
     parser.add_argument('--update_interval', default=30, type=int)
     parser.add_argument('--tol', default=0.0001, type=float)
-    parser.add_argument('--ae_weights', default='data/stackoverflow/artefacts/ae_weights.pth')
-    parser.add_argument('--save_dir', default='data/stackoverflow/artefacts/')
+    parser.add_argument('--ae_weights', default='datasets/stackoverflow/artefacts/ae_weights.pth')
+    parser.add_argument('--save_dir', default='datasets/stackoverflow/artefacts/')
     args = parser.parse_args()
 
     # Exécution du programme principal
