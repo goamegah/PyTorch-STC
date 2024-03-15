@@ -8,10 +8,12 @@ nltk.download('punkt')  # adding new version nltk download
 import numpy as np
 import scipy.io
 from sklearn.decomposition import PCA, TruncatedSVD
-from sklearn.preprocessing import MinMaxScaler
+from sklearn.preprocessing import MinMaxScaler, normalize
+
+from torchclust.data.reader import get_emb, read_label
 
 
-def load_stackoverflow(data_path='data/stackoverflow/'):
+def load_stackoverflow(data_path='datasets/stackoverflow/', normalize_type='MinMax'):
 
     # load SO embedding
     with open(data_path + 'vocab_withIdx.dic', 'r') as inp_indx, \
@@ -74,8 +76,11 @@ def load_stackoverflow(data_path='data/stackoverflow/'):
 
     XX = XX1
 
-    scaler = MinMaxScaler()
-    XX = scaler.fit_transform(XX)
+    if normalize_type == 'MinMax':
+        scaler = MinMaxScaler()
+        XX = scaler.fit_transform(XX)
+    elif normalize_type == 'Spherical':
+        XX = normalize(XX)
 
     with open(data_path + 'label_StackOverflow.txt') as label_file:
         y = np.array(list((map(int, label_file.readlines()))))
@@ -84,7 +89,7 @@ def load_stackoverflow(data_path='data/stackoverflow/'):
     return XX, y
 
 
-def load_search_snippet2(data_path='data/SearchSnippets/'):
+def load_search_snippet2(data_path='datasets/SearchSnippets/'):
     mat = scipy.io.loadmat(data_path + 'SearchSnippets-STC2.mat')
 
     emb_index = np.squeeze(mat['vocab_emb_Word2vec_48_index'])
@@ -157,7 +162,7 @@ def load_search_snippet2(data_path='data/SearchSnippets/'):
     return XX, y
 
 
-def load_biomedical(data_path='data/Biomedical/'):
+def load_biomedical(data_path='datasets/Biomedical/'):
     mat = scipy.io.loadmat(data_path + 'Biomedical-STC2.mat')
 
     emb_index = np.squeeze(mat['vocab_emb_Word2vec_48_index'])
@@ -231,10 +236,26 @@ def load_biomedical(data_path='data/Biomedical/'):
     return XX, y
 
 
-def load_data(dataset_name):
+def load_stackoverflow_jose(data_path='datasets/stackoverflow/', normalize_type='MinMax'):
+    doc_emb = get_emb(vec_file=data_path + '/jose/jose_sof_doc.txt')
+    y_true = read_label(data_dir=data_path)
+    # normalize data 
+    if normalize_type == 'MinMax':
+        scaler = MinMaxScaler()
+        XX = scaler.fit_transform(doc_emb)
+    elif normalize_type == 'Spherical':
+        XX = normalize(doc_emb)
+
+    return XX, y_true
+
+
+def load_data(dataset_name, emb_type="SIF", normalize_type='MinMax'):
     print('load data')
     if dataset_name == 'stackoverflow':
-        return load_stackoverflow()
+        if emb_type == "SIF":
+            return load_stackoverflow(normalize_type=normalize_type)
+        elif emb_type == "JOSE":
+            return load_stackoverflow_jose(normalize_type=normalize_type)
     elif dataset_name == 'biomedical':
         return load_biomedical()
     elif dataset_name == 'search_snippets':

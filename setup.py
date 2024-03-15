@@ -15,7 +15,7 @@ DESCRIPTION = 'Short Text Clustering for PyTorch'
 URL = 'https://github.com/goamegah/PyTorch-Short-Text-Clustering'
 AUTHOR = 'Godwin AMEGAH'
 EMAIL = 'komlan.godwin.amegah@gmail.com'
-REQUIRES_PYTHON = '>=3.8.0'
+REQUIRES_PYTHON = '>=3.6'
 
 for line in open('torchclust/__init__.py'):
     line = line.strip()
@@ -33,12 +33,15 @@ except FileNotFoundError:
     long_description = DESCRIPTION
 
 # Handle the case when requirements.txt does not exist
-requirements_file = HERE / 'requirements.txt'
-if requirements_file.is_file():
-    with open(requirements_file) as f:
-        REQUIRED = f.read().splitlines()
-else:
-    REQUIRED = []
+# requirements_file = HERE / 'requirements.txt'
+# if requirements_file.is_file():
+#     with open(requirements_file) as f:
+#         REQUIRED = f.read().splitlines()
+# else:
+#     REQUIRED = []
+
+REQUIRED = [i.strip() for i in open(HERE / 'requirements.txt') if not i.startswith('#')]
+
 
 setup(
     name=NAME,
