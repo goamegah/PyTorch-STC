@@ -31,9 +31,19 @@ def self_train(model: STC,
     # Step 1: initialize cluster centers using k-means
     print('Initializing cluster centers with k-means.')
     z = model.partial_forward(x)
+
     clusters, y_pred = get_clusters(z, 
                                     n_clusters=model.n_clusters, 
-                                    kind="kmeans")
+                                    kind="rand-SphericalKmeans")
+
+    # clusters, y_pred = get_clusters(z, 
+    #                                 n_clusters=model.n_clusters, 
+    #                                 kind="movMF-soft")
+    
+    # clusters, y_pred = get_clusters(z, 
+    #                                 n_clusters=model.n_clusters, 
+    #                                 kind="kmeans")
+    
     model.clustering_layer.init_clusters(torch.Tensor(clusters))
     y_pred_last = np.copy(y_pred.detach().numpy())
 

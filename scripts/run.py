@@ -17,7 +17,7 @@ from torchclust.utils import pretrain_autoencoder, self_train
 def main(args):
     # Chargement des données
     # Assurez-vous que les données sont chargées sous forme de tenseurs
-    x, y = load_data(args.dataset)
+    x, y = load_data(args.dataset, emb_type="JOSE", normalize_type='Spherical')
     n_clusters = len(torch.unique(torch.tensor(y)))
 
     print("nclusters = ", n_clusters)
@@ -72,6 +72,7 @@ def main(args):
     # Optimisation de l'encodeur avec le clustering
     print("Optimisation de l'encodeur avec le clustering...")
     st_optimizer = optim.Adam(stc.parameters())
+    # st_optimizer = optim.SGD(stc.parameters(), lr=0.1, momentum=0.9)
     st_criterion = nn.KLDivLoss(reduction='batchmean')
 
     y_pred_train = self_train(stc,
@@ -102,7 +103,7 @@ if __name__ == "__main__":
                         choices=['stackoverflow', 'biomedical', 'search_snippets'])
 
     parser.add_argument('--batch_size', default=64, type=int)
-    parser.add_argument('--maxiter', default=1000, type=int)
+    parser.add_argument('--maxiter', default=1500, type=int)
     parser.add_argument('--pretrain_epochs', default=15, type=int)
     parser.add_argument('--update_interval', default=30, type=int)
     parser.add_argument('--tol', default=0.0001, type=float)

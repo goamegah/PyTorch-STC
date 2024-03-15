@@ -1,6 +1,11 @@
 import numpy as np
 from scipy.optimize import linear_sum_assignment
 from sklearn.metrics.cluster import normalized_mutual_info_score
+from sklearn import metrics
+from sklearn.metrics import mutual_info_score
+from sklearn.metrics import normalized_mutual_info_score
+from sklearn.metrics import adjusted_rand_score
+
 
  # Calculer le NMI
 nmi = normalized_mutual_info_score
@@ -27,3 +32,21 @@ def acc(y_true, y_pred):
     accuracy = total_correct / len(y_pred)
 
     return accuracy
+
+
+def purity_score(y_true, y_pred):
+    # compute confusion matrix
+    contingency_matrix = metrics.cluster.contingency_matrix(y_true, y_pred)
+    return np.sum(np.amax(contingency_matrix, axis=0)) / np.sum(contingency_matrix)
+
+
+def cal_metric(y_pred, y_true):
+    s1 = mutual_info_score(y_pred, y_true)
+    print(f'mutual_info_score = {s1}')
+    s2 = normalized_mutual_info_score(y_pred, y_true)
+    print(f'normalized_mutual_info_score = {s2}')
+    s3 = adjusted_rand_score(y_pred, y_true)
+    print(f'adjusted_rand_score = {s3}')
+    s4 = purity_score(y_true, y_pred)
+    print(f'purity = {s4}')
+    return [s1, s2, s3, s4]
