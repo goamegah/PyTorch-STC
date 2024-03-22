@@ -18,4 +18,6 @@ api_docs:
 dist:
 	python setup.py sdist
 
+clean:
+
 .PHONY: linter tests api_docs dist

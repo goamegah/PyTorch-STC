@@ -56,6 +56,7 @@ setup(
     install_requires=REQUIRED,
     extras_require={
         'dev': ['coverage', 'flake8', 'pytest', 'torchinfo'],
+        'vis': ['umap-learn', 'matplotlib']
     },
     packages=[p for p in find_packages() if p.startswith('torchclust')],
     # package_data={'torchclust': ['py.typed']},
