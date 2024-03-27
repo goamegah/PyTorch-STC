@@ -1,6 +1,7 @@
-import numpy as np
 import os 
 from pathlib import Path
+import numpy as np
+import scipy.io
 
 import nltk
 nltk.download('punkt')  # adding new version nltk download
@@ -46,11 +47,27 @@ def get_avg_emb_from_word_vectors(dataset='datasets/stackoverflow',
                                   word_vectors: dict[str, np.array]=None): 
 
     #data_path = HERE / 'datasets' / f'{dataset}'
-    if dataset.endswith('stackoverflow'):
-        #text_file = data_path / 'title_StackOverflow.txt'
-        text_file = dataset+"/title_StackOverflow.txt"
-    elif dataset.endswith('Biomedical'):
-        text_file = dataset+"/Biomedical.txt"
+    data_path = dataset
+    if "stackoverflow" in dataset.split("/"): 
+        if dataset.endswith('jose'):
+            # back to link without jose
+            # and turn it to path with join
+            data_path = "/".join(dataset.split("/")[:-1])
+        text_file = data_path+"/title_StackOverflow.txt"
+    elif "Biomedical" in dataset.split("/"): 
+        if dataset.endswith('jose'):
+            # back to link without jose
+            # and turn it to path with join
+            data_path = "/".join(dataset.split("/")[:-1])
+        print(">>>>> agv_bio", data_path)
+        text_file = data_path+"/Biomedical.txt"
+    
+    elif 'SearchSnippets' in dataset.split("/"):
+        if dataset.endswith('jose'):
+            # back to link without jose
+            # and turn it to path with join
+            data_path = "/".join(dataset.split("/")[:-1])
+        text_file = data_path+"/SearchSnippets.txt"
     elif dataset == '20news':
         pass
 
@@ -120,12 +137,16 @@ def read_label(dataset='datasets/stackoverflow'):
     #data_path = HERE / 'datasets' / f'{dataset}'
     if dataset.endswith('stackoverflow'):
         label_file = dataset + '/label_StackOverflow.txt'
+        f = open(label_file, 'r')
+        docs = f.readlines()
+        y_true = np.array([int(doc.strip())-1 for doc in docs])
+
     elif dataset.endswith('Biomedical'):
-        label_file = dataset + '/Biomedical_gnd.txt'
+        mat_file = dataset + '/Biomedical-STC2.mat'
+        mat = scipy.io.loadmat(mat_file)
+        y_true = np.squeeze(mat['labels_All'])
+        del mat
     elif dataset == '20news':
         pass
 
-    f = open(label_file, 'r')
-    docs = f.readlines()
-    y_true = np.array([int(doc.strip())-1 for doc in docs])
     return y_true

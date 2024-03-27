@@ -1,8 +1,10 @@
+from scipy.sparse import csr_matrix
 from sklearn.cluster import KMeans
 #from spherecluster import VonMisesFisherMixture, SphericalKMeans
 #from soyclustering import SphericalKMeans
 #from coclust.clustering.spherical_kmeans import SphericalKmeans
 from torchclust.utils.spherical_kmeans import SphericalKmeans
+from torchclust.utils.sphericalKmeans_optim import SphericalKMeans
 import torch
 
 
@@ -27,3 +29,9 @@ def get_clusters(x: torch.Tensor,
                                       n_init=50)
             skmeans.fit(x.detach().numpy())
             return torch.Tensor(skmeans.centers), torch.Tensor(skmeans.labels_)
+        
+        elif kind == "SphericalKmeans++":
+            skmeanspp = SphericalKMeans(n_clusters=n_clusters)
+            x = csr_matrix(x.detach().numpy())
+            skmeanspp.fit(x)
+            return torch.Tensor(skmeanspp.cluster_centers_), torch.Tensor(skmeanspp.labels_)

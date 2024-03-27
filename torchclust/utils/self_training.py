@@ -27,8 +27,8 @@ def self_train(model: STC,
     # instantiate evaluate class
     eval = Evaluate()
 
-    # Step 1: initialize cluster centers using k-means
-    print('Initializing cluster centers with k-means.')
+    # Step 1: initialize cluster centers using k-means-like algorithm
+    print(f'Initializing cluster centers with {args.init}.')
     z = model.partial_forward(x)
 
     clusters, y_pred = get_clusters(z, 
@@ -116,5 +116,5 @@ def pretrain_autoencoder(model: AutoEncoder,
         hidden_units = [str(d) for d in model.hidden_units]
         hidden_units = ":".join(hidden_units)
 
-        torch.save(model.state_dict(), f'{args.ae_weights}-d{hidden_units}-epoch{args.pretrain_epochs}.pth')
-        print(f"Pretrained autoencoder weights saved to: {args.ae_weights}-d{hidden_units}-epoch{args.pretrain_epochs}.pth'")
+        torch.save(model.state_dict(), f'{args.save_dir}ae-d{hidden_units}-epoch{args.pretrain_epochs}.pth')
+        print(f"Pretrained autoencoder weights saved to: {args.save_dir}ae-d{hidden_units}-epoch{args.pretrain_epochs}.pth'")

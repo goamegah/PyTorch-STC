@@ -8,6 +8,6 @@ PyTorch Short Text Clustering
 """
 
 # flake8: noqa
-from . import models
+from . import models, utils
 
 __version__ = '0.0.1'
