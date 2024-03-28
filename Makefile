@@ -5,7 +5,7 @@ install:
 	pip install -U -e '.[dev]'
 
 linter:
-	flake8 torchclust && mypy torchclusts
+	flake8 torchclust && mypy torchclust
 	flake8 tests && mypy tests
 
 tests:
@@ -17,5 +17,7 @@ api_docs:
 
 dist:
 	python setup.py sdist
+
+clean:
 
 .PHONY: linter tests api_docs dist

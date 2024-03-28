@@ -1,7 +1,7 @@
 import pytest
 import torch
 
-from torchclust.models import AutoEncoder
+from torchstc.models import AutoEncoder
 
 class TestAutoEncoder:
 	def _create_autoencoder_model(self, 
