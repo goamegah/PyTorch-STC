@@ -5,7 +5,7 @@ install:
 	pip install -U -e '.[dev]'
 
 linter:
-	flake8 torchclust && mypy torchclusts
+	flake8 torchclust && mypy torchclust
 	flake8 tests && mypy tests
 
 tests:

@@ -9,10 +9,10 @@ from pathlib import Path
 from setuptools import setup, find_packages
 
 
-NAME = 'torchclust'
-DESCRIPTION = 'Short Text Clustering for PyTorch'
+NAME = 'torchSTC'
+DESCRIPTION = 'PyTorch Self Training approch for Short Text Clustering'
 
-URL = 'https://github.com/goamegah/PyTorch-Short-Text-Clustering'
+URL = 'https://github.com/goamegah/torchSTC'
 AUTHOR = 'Godwin AMEGAH'
 EMAIL = 'komlan.godwin.amegah@gmail.com'
 REQUIRES_PYTHON = '>=3.6'
@@ -58,7 +58,7 @@ setup(
         'dev': ['coverage', 'flake8', 'pytest', 'torchinfo'],
         'vis': ['umap-learn', 'matplotlib']
     },
-    packages=[p for p in find_packages() if p.startswith('torchclust')],
+    packages=[p for p in find_packages() if p.startswith('torchSTC')],
     # package_data={'torchclust': ['py.typed']},
     include_package_data=True,
     license='MIT License',
@@ -67,6 +67,6 @@ setup(
         # Full list: https://pypi.python.org/pypi?%3Aaction=list_classifiers
         'License :: OSI Approved :: MIT License',
         'Topic :: Text :: Short Text',
-        'Topic :: Scientific/Engineering :: Artificial Intelligence',
+        'Topic :: Scientific/Engineering :: Artificial Intelligence, Deep Learning, Representation Learning, Clustering',
     ],
 )

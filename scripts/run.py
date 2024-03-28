@@ -1,5 +1,9 @@
 import argparse
 import os
+
+import numpy as np
+from sklearn.cluster import KMeans
+
 import torch
 import torch.nn as nn
 import torch.optim as optim
@@ -9,10 +13,12 @@ from torch.utils.data import DataLoader
 from torchinfo import summary
 
 # Import des modules STC et AutoEncoder
-from torchclust.modules import STC
+from torchstc.modules import STC
 #from torchclust.metrics import metrics
-from torchclust.data import load_data
-from torchclust.utils import pretrain_autoencoder, self_train
+from torchstc.data import load_data
+from torchstc.utils import pretrain_autoencoder, self_train
+#from torchclust.utils.cluster import SphericalKmeans
+#from torchclust.metrics import Evaluate
 
 def main(args):
     print('\n*********************************** Step1 - loading data, Embedding *******************************\n')
@@ -101,20 +107,45 @@ def main(args):
 
     y_pred_train = self_train(stc, st_criterion, st_optimizer, args, x=X_train, y=y_train)
 
-    # # Évaluation du modèle sur l'ensemble de test
-    # _, decoded_test = stc(X_test)
-    # q_test = stc.clustering_layer(X_test)
-    # y_pred_test = torch.argmax(q_test, dim=1)
-    # acc_test = metrics.acc(y_test, y_pred_test.numpy())
-    # nmi_test = metrics.nmi(y_test, y_pred_test.numpy())
-    # print(f"Accuracy on test set: {acc_test:.4f}")
-    # print(f"NMI on test set: {nmi_test:.4f}")
+    # eval = Evaluate()
+
+    # # # Évaluation du modèle sur l'ensemble de test
+    # z = stc.autoencoder.encoder(X_test)
+
+    # # comprehension list with 5 runs of Sherical kmeans, get average and std of metrics
+    # avg_hgf_mmx_iskm = []
+    # tmp = []
+    # for _ in range(5):
+    #     skmeans = SphericalKmeans(n_clusters=n_clusters, n_init=50)
+    #     skmeans.fit(z.detach().numpy())
+    #     y_skm_pred = skmeans.labels_
+    #     tmp.append(eval.allMetrics(y_test.detach().numpy(), y_skm_pred))
+
+    # avg_hgf_mmx_iskm = np.array(tmp)
+    # np.round(avg_hgf_mmx_iskm.mean(axis=0), 3) * 100, avg_hgf_mmx_iskm.std(axis=0)
+
+    # avg_hgf_mmx_ikm = []
+    # tmp = []
+    # for _ in range(5):
+    #     kmeans = KMeans(n_clusters=n_clusters, n_init=50)
+    #     kmeans.fit(z.detach().numpy())
+    #     y_km_pred = kmeans.labels_
+    #     tmp.append(eval.allMetrics(y_test.detach().numpy(), y_km_pred))
+
+    # avg_hgf_mmx_ikm = np.array(tmp)
+    # np.round(avg_hgf_mmx_ikm.mean(axis=0), 3) * 100, avg_hgf_mmx_ikm.std(axis=0)
+
+
+
+    # print(f"SKmeans on X_test: {np.round(avg_hgf_mmx_iskm.mean(axis=0), 3) * 100}, {avg_hgf_mmx_iskm.std(axis=0)}")
+    # print(f"Kmeans on X_test: {np.round(avg_hgf_mmx_ikm.mean(axis=0), 3) * 100}, {avg_hgf_mmx_ikm.std(axis=0)}")
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='train',
                                      formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     
-    parser.add_argument('--dataset', default='biomedical',
+    parser.add_argument('--dataset', default='stackoverflow',
                         choices=['stackoverflow', 'biomedical', 'search_snippets'])
     parser.add_argument('--batch_size', default=64, type=int)
     parser.add_argument('--maxiter', default=1000, type=int)
@@ -122,7 +153,7 @@ if __name__ == "__main__":
     parser.add_argument('--update_interval', default=30, type=int)
     parser.add_argument('--tol', default=0.0001, type=float)
     
-    parser.add_argument('--word_emb', default='HuggingFace', 
+    parser.add_argument('--word_emb', default='Word2Vec', 
                         choices= ['Word2Vec', 'HuggingFace', 'Jose'])
     
     parser.add_argument('--transform_emb', default='SIF', 
@@ -162,7 +193,7 @@ if __name__ == "__main__":
 
     elif args.dataset == 'biomedical':
         args.update_interval = 500
-        args.pretrain_epochs = 50
+        args.pretrain_epochs = 15
         args.maxiter = 1500
 
         args.dataset = 'datasets/Biomedical'

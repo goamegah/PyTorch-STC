@@ -2,7 +2,7 @@ import pytest
 
 import torch
 
-from torchclust.modules import ClusteringLayer
+from torchstc.modules import ClusteringLayer
 
 class TestClusteringLayer:
     def _create_clustering_layer(self, 
