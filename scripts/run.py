@@ -13,10 +13,10 @@ from torch.utils.data import DataLoader
 from torchinfo import summary
 
 # Import des modules STC et AutoEncoder
-from torchstc.modules import STC
+from torchSTC.modules import STC
 #from torchclust.metrics import metrics
-from torchstc.data import load_data
-from torchstc.utils import pretrain_autoencoder, self_train
+from torchSTC.data import load_data
+from torchSTC.utils import pretrain_autoencoder, self_train
 #from torchclust.utils.cluster import SphericalKmeans
 #from torchclust.metrics import Evaluate
 
@@ -145,7 +145,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='train',
                                      formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     
-    parser.add_argument('--dataset', default='stackoverflow',
+    parser.add_argument('--dataset', default='biomedical',
                         choices=['stackoverflow', 'biomedical', 'search_snippets'])
     parser.add_argument('--batch_size', default=64, type=int)
     parser.add_argument('--maxiter', default=1000, type=int)
@@ -192,6 +192,10 @@ if __name__ == "__main__":
         args.save_dir = 'datasets/stackoverflow/artefacts/'
 
     elif args.dataset == 'biomedical':
+        # args.update_interval = 500
+        # args.pretrain_epochs = 30
+        # args.maxiter = 1500
+
         args.update_interval = 500
         args.pretrain_epochs = 15
         args.maxiter = 1500
