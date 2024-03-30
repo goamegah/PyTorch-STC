@@ -17,7 +17,7 @@ AUTHOR = 'Godwin AMEGAH'
 EMAIL = 'komlan.godwin.amegah@gmail.com'
 REQUIRES_PYTHON = '>=3.6'
 
-for line in open('torchclust/__init__.py'):
+for line in open('torchSTC/__init__.py'):
     line = line.strip()
     if '__version__' in line:
         context = {}
@@ -52,11 +52,11 @@ setup(
     long_description_content_type='text/markdown',
     author=AUTHOR,
     url=URL,
-    python_requires=REQUIRES_PYTHON,
+    #python_requires=REQUIRES_PYTHON,
     install_requires=REQUIRED,
     extras_require={
-        'dev': ['coverage', 'flake8', 'pytest', 'torchinfo'],
-        'vis': ['umap-learn', 'matplotlib']
+        'dev': ['coverage', 'flake8', 'pytest', 'torchinfo', 'tabulate'],
+        'vis': ['umap-learn', 'matplotlib', 'tensorboardX']
     },
     packages=[p for p in find_packages() if p.startswith('torchSTC')],
     # package_data={'torchclust': ['py.typed']},
