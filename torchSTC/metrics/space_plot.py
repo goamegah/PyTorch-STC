@@ -66,6 +66,7 @@ class SpacePlot:
                     marker = 'o')
 
         plt.title("{} Self-training embeddings {} ({}|{})".format(data_name, reduction, comp[0], comp[1]))
+        plt.tick_params(top='off', bottom='off', left='off', right='off', labelleft='off', labelbottom='off')
 
         if len(reduction) == 0:
             plt.axis((-1.1, 1.1, -1.1, 1.1))
@@ -77,7 +78,7 @@ class SpacePlot:
         fig = plt.figure()
         ax = Axes3D(fig, auto_add_to_figure=False)
         fig.add_axes(ax)
-        colors = self._get_colors(15)
+        colors = self._get_colors(20)
         if colLabels is not None:
             colors = self._get_colors(len(set(colLabels)))
         ax.scatter(embedding[:,comp[0]], embedding[:,comp[1]], embedding[:,comp[2]],
