@@ -1,9 +1,7 @@
-# required for spherecluster
-numpy<2,>=1.21
-scipy>=1.8.0
+numpy
+scipy
+scikit-learn
 openpyxl
-spherecluster2
-# torch
 torch
 tqdm
 nltk
