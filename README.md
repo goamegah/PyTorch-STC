@@ -8,21 +8,15 @@ PyTorch version of Self-training approch for short text clustering
 ## Installation
 
 - Using **venv**
+
+Create environement like below.
+
 ```
 $ python -m venv torchSTC
 $ source torchSTC/bin/activate
-$ python scripts/run.py
 ```
 
-
-- Using **conda** 
-```
-$ conda env create --name torchSTC --file env.yaml
-$ conda activate torchSTC
-$ python scripts/run.py
-```
-
-- By cloning **repository**
+Clone repository and run installation step
 
 ```
 $ git clone git@github.com:goamegah/torchSTC.git
@@ -30,6 +24,29 @@ $ cd torchSTC
 $ pip install .
 $ python scripts/run.py
 ```
+
+ In such case you might want to make visualisation or use PyTorch libs like *torchinfo*, you have to lunch instead command below  
+
+```
+$ python -m venv torchSTC
+$ source torchSTC/bin/activate
+$ git clone git@github.com:goamegah/torchSTC.git
+$ cd torchSTC
+$ pip install ".[dev, vis]"
+$ python scripts/run.py
+```
+
+- Using **conda** 
+
+```
+$ conda env create --name torchSTC --file env.yaml
+$ conda activate torchSTC
+$ python scripts/run.py
+```
+
+
+
+
 
 ## Config file
 
