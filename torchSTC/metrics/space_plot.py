@@ -83,7 +83,7 @@ class SpacePlot:
             colors = self._get_colors(len(set(colLabels)))
         ax.scatter(embedding[:,comp[0]], embedding[:,comp[1]], embedding[:,comp[2]],
                        c = np.array(colors)[colLabels],
-                       s = 20, edgecolors = "black", linewidth = 0.25,
+                       s = 3, edgecolors = "black", linewidth = 0.25,
                    marker = 'o')
         plt.title("{} Self-training embeddings {} ({}|{}|{})".format(data_name, reduction, comp[0], comp[1], comp[2]))
 

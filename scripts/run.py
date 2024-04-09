@@ -43,8 +43,8 @@ def main(args):
                               batch_size=args.batch_size, 
                               shuffle=True)
     
-
-    hidden_dims = [torch.Tensor(X_train).shape[-1], 500, 500, 2000, 20]
+    # torch.Tensor(X_train).shape[-1], 500, 500, 2000, 20
+    hidden_dims = [torch.Tensor(X_train).shape[-1], 500, 500, 2000, 50]
     stc = STC(hidden_dims=hidden_dims, n_clusters=n_clusters)
     
     # build string indicating the autoencoder hidden dim format like this: d:d2:...:dn
@@ -108,16 +108,16 @@ if __name__ == "__main__":
     parser.add_argument('--word_emb', default='Word2Vec', 
                         choices= ['Word2Vec', 'HuggingFace', 'Jose'])
     
-    parser.add_argument('--transform_emb', default='SIF', 
+    parser.add_argument('--transform_emb', default=None, 
                         choices= [None, 'SIF'])
     
-    parser.add_argument('--scaler', default='MinMax', 
+    parser.add_argument('--scaler', default=None, 
                         choices=[None, 'MinMax', 'Standard'])
     
-    parser.add_argument('--norm', default='l2',
+    parser.add_argument('--norm', default=None,
                         choices=['l2', 'l1', 'max'])
     
-    parser.add_argument('--init', default='Kmeans', 
+    parser.add_argument('--init', default='movMF-soft', 
                         choices=['Kmeans', 'movMF-soft', 
                                  'SphericalKmeans', 'SphericalKmeans++'])
     
@@ -132,8 +132,8 @@ if __name__ == "__main__":
         # args.maxiter = 100
         # args.pretrain_epochs = 30
 
-        args.update_interval = 500
-        args.maxiter = 1000
+        args.update_interval = 200
+        args.maxiter = 1200
         args.pretrain_epochs = 30
 
         args.dataset = 'datasets/SearchSnippets'

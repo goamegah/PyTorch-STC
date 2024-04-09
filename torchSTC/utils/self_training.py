@@ -40,14 +40,6 @@ def self_train(model: STC,
     clusters, y_pred = get_clusters(z, 
                                     n_clusters=model.n_clusters, 
                                     kind=args.init)
-
-    # clusters, y_pred = get_clusters(z, 
-    #                                 n_clusters=model.n_clusters, 
-    #                                 kind="movMF-soft")
-    
-    # clusters, y_pred = get_clusters(z, 
-    #                                 n_clusters=model.n_clusters, 
-    #                                 kind="kmeans")
     
     model.clustering_layer.init_clusters(torch.Tensor(clusters))
     y_pred_last = np.copy(y_pred.detach().numpy())
@@ -108,7 +100,9 @@ def pretrain_autoencoder(model: AutoEncoder,
         model.train()
         for epoch in range(args.pretrain_epochs):
             total_loss = 0.0
-            for data, _ in tqdm(train_loader, desc=f'Epoch {epoch + 1}/{args.pretrain_epochs}', leave=False):
+            for data, _ in tqdm(train_loader, 
+                                desc=f'Epoch {epoch + 1}/{args.pretrain_epochs}', 
+                                leave=False):
                 optimizer.zero_grad()
                 decoded = model(data)
                 loss = criterion(decoded, data)

@@ -1,6 +1,6 @@
 from scipy.sparse import csr_matrix
 from sklearn.cluster import KMeans
-#from spherecluster import VonMisesFisherMixture, SphericalKMeans
+from spherecluster import VonMisesFisherMixture
 #from soyclustering import SphericalKMeans
 #from coclust.clustering.spherical_kmeans import SphericalKmeans
 from torchSTC.utils.spherical_kmeans import SphericalKmeans
@@ -19,9 +19,12 @@ def get_clusters(x: torch.Tensor,
 
         elif kind == "movMF-soft":
             # spharical kmeans
-            vmf_soft = VonMisesFisherMixture(n_clusters=n_clusters, posterior_type='soft')
+            # spherical-k-means
+            # k-means++
+            vmf_soft = VonMisesFisherMixture(n_clusters=n_clusters, 
+                                             posterior_type='soft')
             vmf_soft.fit(x.detach().numpy())
-            return torch.Tensor(vmf_soft.cluster_centers_), torch.Tensor(vmf_soft.predict(x))
+            return torch.Tensor(vmf_soft.cluster_centers_), torch.Tensor(vmf_soft.labels_)
 
         elif kind == "SphericalKmeans":
             skmeans = SphericalKmeans(n_clusters=n_clusters,

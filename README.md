@@ -45,9 +45,6 @@ $ python scripts/run.py
 ```
 
 
-
-
-
 ## Config file
 
 Before running torchSTC, make sure you choose the correct running configurations. You can change the running configurations by passing keyword arguments to the ```run.py``` file.
