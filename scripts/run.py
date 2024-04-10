@@ -1,8 +1,8 @@
 import argparse
 import os
-
-import numpy as np
-from sklearn.cluster import KMeans
+import sys
+from os.path import abspath
+sys.path.insert(0, abspath('..'))
 
 import torch
 import torch.nn as nn
@@ -12,24 +12,17 @@ from sklearn.model_selection import train_test_split
 from torch.utils.data import DataLoader
 from torchinfo import summary
 
-# Import des modules STC et AutoEncoder
+
 from torchSTC.modules import STC
-#from torchclust.metrics import metrics
 from torchSTC.data import load_data
-from torchSTC.utils import pretrain_autoencoder, self_train
-#from torchclust.utils.cluster import SphericalKmeans
-#from torchclust.metrics import Evaluate
+from torchSTC.utils.self_training import pretrain_autoencoder, self_train
 
 def main(args):
-    print('\n*********************************** Step1 - loading data, Embedding *******************************\n')
-    # Chargement des données
-    # Assurez-vous que les données sont chargées sous forme de tenseurs
-    #x, y = load_data(args.dataset, emb_type="W2V-SIF", normalize_type='MinMax')
+
+    print('\n*********************************** Step 1 - loading data, Embedding *******************************\n')
+
+    # load data
     x, y = load_data(args.dataset, word_emb=args.word_emb, transform=args.transform_emb, scaler=args.scaler, norm=args.norm)
-    #x, y = load_data(args.dataset, emb_type="JOSE", normalize_type='MinMax')
-    #x, y = load_data(args.dataset, emb_type="JOSE", normalize_type='Spherical')
-    #x, y = load_data(args.dataset, emb_type="JOSE-SIF", normalize_type='MinMax')
-    #x, y = load_data(args.dataset, emb_type="JOSE-SIF", normalize_type='Spherical')
     n_clusters = len(torch.unique(torch.tensor(y)))
 
     print(f"Data shape: {x.shape}, Labels shape: {y.shape}")
@@ -47,27 +40,19 @@ def main(args):
     y_test = torch.tensor(y_test, dtype=torch.long)
 
     train_loader = DataLoader(torch.utils.data.TensorDataset(X_train, y_train), 
-                                  batch_size=args.batch_size, 
-                                  shuffle=True)
+                              batch_size=args.batch_size, 
+                              shuffle=True)
     
-    # Création du modèle STC
-    #print(torch.Tensor(X_train).shape)
-    #print(X_train.shape[-1])
-    #test_ae = AutoEncoder([X_train.shape[-1], 500, 500, 2000, 20])
-    #print(test_ae.encoder(torch.Tensor(X_train)).shape)
-    #summary(test_ae.encoder, torch.Tensor(X_train).shape)
-
-    hidden_dims = [torch.Tensor(X_train).shape[-1], 500, 500, 2000, 20]
+    # torch.Tensor(X_train).shape[-1], 500, 500, 2000, 20
+    hidden_dims = [torch.Tensor(X_train).shape[-1], 500, 500, 2000, 50]
     stc = STC(hidden_dims=hidden_dims, n_clusters=n_clusters)
-    #print(stc.autoencoder.encoder(torch.Tensor(X_train)).shape)
-    #print(len(stc.clustering_layer(stc.autoencoder.encoder(torch.Tensor(X_train)))))
     
     # build string indicating the autoencoder hidden dim format like this: d:d2:...:dn
     hidden_units = [str(d) for d in hidden_dims]
     hidden_units = ":".join(hidden_units)
     print(f"Autoencoder hidden units: {hidden_units}")
 
-    # Préentraînement de l'autoencodeur si les poids ne sont pas déjà préentraînés
+    # Pretraining Autoencoder whether the weights are not already saved
     print('\n ****************************** Step 2 - Pretraining Auto encoder ***************************\n')
     data = args.dataset.split("/")[-1]
     art_dir = f'{args.save_dir}STC-d{hidden_units}-epoch{args.pretrain_epochs}-dat{data}-wde{args.word_emb}-sca{args.scaler}-tfe{args.transform_emb}-norm{args.norm}-init{args.init}/'
@@ -98,54 +83,21 @@ def main(args):
 
     print('\n*********************************** Step 3 - Self-traning **********************************\n')
 
-
-    # Optimisation de l'encodeur avec le clustering
+    # define the optimizer and criterion for the self-training
     print("Optimisation de l'encodeur avec le clustering...")
     st_optimizer = optim.Adam(stc.parameters())
     # st_optimizer = optim.SGD(stc.parameters(), lr=0.1, momentum=0.9)
     st_criterion = nn.KLDivLoss(reduction='batchmean')
 
-    y_pred_train = self_train(stc, st_criterion, st_optimizer, args, x=X_train, y=y_train)
-
-    # eval = Evaluate()
-
-    # # # Évaluation du modèle sur l'ensemble de test
-    # z = stc.autoencoder.encoder(X_test)
-
-    # # comprehension list with 5 runs of Sherical kmeans, get average and std of metrics
-    # avg_hgf_mmx_iskm = []
-    # tmp = []
-    # for _ in range(5):
-    #     skmeans = SphericalKmeans(n_clusters=n_clusters, n_init=50)
-    #     skmeans.fit(z.detach().numpy())
-    #     y_skm_pred = skmeans.labels_
-    #     tmp.append(eval.allMetrics(y_test.detach().numpy(), y_skm_pred))
-
-    # avg_hgf_mmx_iskm = np.array(tmp)
-    # np.round(avg_hgf_mmx_iskm.mean(axis=0), 3) * 100, avg_hgf_mmx_iskm.std(axis=0)
-
-    # avg_hgf_mmx_ikm = []
-    # tmp = []
-    # for _ in range(5):
-    #     kmeans = KMeans(n_clusters=n_clusters, n_init=50)
-    #     kmeans.fit(z.detach().numpy())
-    #     y_km_pred = kmeans.labels_
-    #     tmp.append(eval.allMetrics(y_test.detach().numpy(), y_km_pred))
-
-    # avg_hgf_mmx_ikm = np.array(tmp)
-    # np.round(avg_hgf_mmx_ikm.mean(axis=0), 3) * 100, avg_hgf_mmx_ikm.std(axis=0)
-
-
-
-    # print(f"SKmeans on X_test: {np.round(avg_hgf_mmx_iskm.mean(axis=0), 3) * 100}, {avg_hgf_mmx_iskm.std(axis=0)}")
-    # print(f"Kmeans on X_test: {np.round(avg_hgf_mmx_ikm.mean(axis=0), 3) * 100}, {avg_hgf_mmx_ikm.std(axis=0)}")
+    # Train the model with self-training
+    _ = self_train(stc, st_criterion, st_optimizer, args, x=X_train, y=y_train)
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='train',
                                      formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     
-    parser.add_argument('--dataset', default='biomedical',
+    parser.add_argument('--dataset', default='search_snippets',
                         choices=['stackoverflow', 'biomedical', 'search_snippets'])
     parser.add_argument('--batch_size', default=64, type=int)
     parser.add_argument('--maxiter', default=1000, type=int)
@@ -156,16 +108,16 @@ if __name__ == "__main__":
     parser.add_argument('--word_emb', default='Word2Vec', 
                         choices= ['Word2Vec', 'HuggingFace', 'Jose'])
     
-    parser.add_argument('--transform_emb', default='SIF', 
+    parser.add_argument('--transform_emb', default=None, 
                         choices= [None, 'SIF'])
     
-    parser.add_argument('--scaler', default='MinMax', 
+    parser.add_argument('--scaler', default=None, 
                         choices=[None, 'MinMax', 'Standard'])
     
     parser.add_argument('--norm', default=None,
                         choices=['l2', 'l1', 'max'])
     
-    parser.add_argument('--init', default='Kmeans', 
+    parser.add_argument('--init', default='movMF-soft', 
                         choices=['Kmeans', 'movMF-soft', 
                                  'SphericalKmeans', 'SphericalKmeans++'])
     
@@ -176,8 +128,12 @@ if __name__ == "__main__":
     print(args)
 
     if args.dataset == 'search_snippets':
-        args.update_interval = 30
-        args.maxiter = 100
+        # args.update_interval = 30
+        # args.maxiter = 100
+        # args.pretrain_epochs = 30
+
+        args.update_interval = 200
+        args.maxiter = 1200
         args.pretrain_epochs = 30
 
         args.dataset = 'datasets/SearchSnippets'
@@ -186,7 +142,7 @@ if __name__ == "__main__":
     elif args.dataset == 'stackoverflow':
         args.update_interval = 500
         args.maxiter = 1500
-        args.pretrain_epochs = 15
+        args.pretrain_epochs = 16
 
         args.dataset = 'datasets/stackoverflow'
         args.save_dir = 'datasets/stackoverflow/artefacts/'
@@ -197,7 +153,7 @@ if __name__ == "__main__":
         # args.maxiter = 1500
 
         args.update_interval = 500
-        args.pretrain_epochs = 15
+        args.pretrain_epochs = 30
         args.maxiter = 1500
 
         args.dataset = 'datasets/Biomedical'
@@ -207,5 +163,5 @@ if __name__ == "__main__":
         raise Exception("Dataset not found!")
 
 
-    # Exécution du programme principal
+    # run the main function
     main(args)

@@ -40,7 +40,8 @@ except FileNotFoundError:
 # else:
 #     REQUIRED = []
 
-REQUIRED = [i.strip() for i in open(HERE / 'requirements.txt') if not i.startswith('#')]
+REQUIRES_FILE = HERE / 'vmf_requirements.txt'
+REQUIRED = [i.strip() for i in open(REQUIRES_FILE) if not i.startswith('#')]
 
 
 setup(
