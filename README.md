@@ -25,7 +25,7 @@ $ pip install .
 $ python scripts/run.py
 ```
 
- In such case you might want to make visualisation or use PyTorch libs like *torchinfo*, you have to lunch instead command below  
+In this case, if you want to visualize or use PyTorch libraries like *torchinfo*, you need to run the following command instead.
 
 ```
 $ python -m venv torchSTC

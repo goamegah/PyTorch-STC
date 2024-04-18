@@ -65,7 +65,7 @@ def get_word_vectors(data_path="datasets/stackoverflow",
         elif word_emb == 'Jose':
             if data_path.endswith('jose'):
                 data_path = "/".join(data_path.split("/")[:-1])
-            vec_file = data_path + '/jose/jose_sof_wv.txt'
+            vec_file = data_path + '/jose/jose_sof_wv_d48.txt'
             word_vectors, _, _ = get_wv_emb(vec_file=vec_file)
             
             print('Jose words embedding loaded...')
@@ -75,7 +75,7 @@ def get_word_vectors(data_path="datasets/stackoverflow",
     elif "Biomedical" in data_path.split("/"):
         print("Test bio w2v bis ==> ==> ==> ")
         if word_emb == 'Word2Vec':
-            vec_file = data_path + '/w2v_bio_d384.txt'
+            vec_file = data_path + '/w2v_bio_d48.txt'
             word_vectors, _, _ = get_wv_emb(vec_file=vec_file)
         # if word_emb == 'Word2Vec':
         #     mat = scipy.io.loadmat(data_path + '/Biomedical-STC2.mat')
@@ -106,8 +106,8 @@ def get_word_vectors(data_path="datasets/stackoverflow",
         #         del emb_index
         #         del emb_vec
 
-        #     # message indicating the type words embedding process
-        #     print('Word2Vec words embedding loaded...')
+            # message indicating the type words embedding process
+            print('Word2Vec words embedding loaded...')
             return word_vectors
         elif word_emb == 'Jose':
             if data_path.endswith('jose'):
@@ -349,8 +349,8 @@ def load_stackoverflow_hf(data_path='datasets/stackoverflow',
                           norm: Union[Literal['l2', 'l1', 'max'], None]=None):
     
     
-    output = pd.read_excel(data_path+'/HuggingFace/output_stack.xlsx')
-    embeddings2 = output['embeddings2']
+    file = pd.read_excel(data_path+'/HuggingFace/output_stack.xlsx')
+    embeddings2 = file['embeddings2']
     embeddings_array = np.array(embeddings2)
     processed_data = [ast.literal_eval(embedding_str) for embedding_str in embeddings_array]
 
@@ -371,8 +371,8 @@ def load_stackoverflow_hf(data_path='datasets/stackoverflow',
 
     x = np.array(processed_data)
     
-    y = pd.read_excel(data_path+'/HuggingFace/y.xlsx', header = None)
-    y = y.values.flatten()
+    file = pd.read_excel(data_path+'/HuggingFace/y.xlsx', header=None)
+    y = file.values.flatten()
 
     return x, y
     
@@ -393,7 +393,7 @@ def load_search_snippet2(data_path='datasets/SearchSnippets',
     y = np.squeeze(mat['labels_All'])
     del mat
     
-    # print check if doc_embedded contains NaN
+    # check if doc_embedded contains NaN
     if np.isnan(doc_embedded).any():
         print('doc_embedded contains NaN values...')
 
@@ -422,7 +422,6 @@ def load_search_snippet2_hf(data_path='datasets/SearchSnippets',
                             scaler: Union[Literal['MinMax', 'Standard'], None]=None,
                             norm: Union[Literal['l2', 'l1', 'max'], None]=None):
     
-    #Importation des HuggingFace Embedding
     output = pd.read_excel(data_path+'/HuggingFace/output_snippet.xlsx')
     embeddings2 = output['embeddings2']
     embeddings_array = np.array(embeddings2)
@@ -442,9 +441,8 @@ def load_search_snippet2_hf(data_path='datasets/SearchSnippets',
     else:
         print('No scaling applied...')
     
-
     x = np.array(processed_data)
-    # les labels
+
     y = pd.read_excel(data_path+'/HuggingFace/y.xlsx', header = None)
     y = y.values.flatten()
 
@@ -552,9 +550,9 @@ def load_biomedical_hf(data_path='datasets/Biomedical',
 
     x = np.array(processed_data)
     
-    y = pd.read_excel(data_path+'/HuggingFace/y.xlsx', header = None)
+    y = pd.read_excel(data_path+'/HuggingFace/y.xlsx', header=None)
     y = y.values.flatten()
-    return
+    return x, y
 
 
 
