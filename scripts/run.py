@@ -44,7 +44,7 @@ def main(args):
                               shuffle=True)
     
     # torch.Tensor(X_train).shape[-1], 500, 500, 2000, 20
-    hidden_dims = [torch.Tensor(X_train).shape[-1], 500, 500, 2000, 50]
+    hidden_dims = [torch.Tensor(X_train).shape[-1], 500, 2000, 20]
     stc = STC(hidden_dims=hidden_dims, n_clusters=n_clusters)
     
     # build string indicating the autoencoder hidden dim format like this: d:d2:...:dn
@@ -62,7 +62,10 @@ def main(args):
         os.makedirs(os.path.dirname(art_dir), exist_ok=True)
         args.save_dir = art_dir
         print("Préentraînement de l'autoencodeur...")
-        ae_optimizer = optim.Adam(stc.autoencoder.parameters())
+        ae_optimizer = optim.Adam(stc.autoencoder.parameters(), 
+                                  lr=0.001,
+                                  weight_decay=1e-5)
+        #ae_optimizer = optim.SGD(stc.parameters(), lr=0.01, momentum=0.9)
         ae_criterion = nn.MSELoss()
         pretrain_autoencoder(stc.autoencoder,
                              train_loader, 
@@ -86,7 +89,7 @@ def main(args):
     # define the optimizer and criterion for the self-training
     print("Optimisation de l'encodeur avec le clustering...")
     st_optimizer = optim.Adam(stc.parameters())
-    # st_optimizer = optim.SGD(stc.parameters(), lr=0.1, momentum=0.9)
+    #st_optimizer = optim.SGD(stc.parameters(), lr=0.01, momentum=0.9)
     st_criterion = nn.KLDivLoss(reduction='batchmean')
 
     # Train the model with self-training
@@ -97,7 +100,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='train',
                                      formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     
-    parser.add_argument('--dataset', default='search_snippets',
+    parser.add_argument('--dataset', default='biomedical',
                         choices=['stackoverflow', 'biomedical', 'search_snippets'])
     parser.add_argument('--batch_size', default=64, type=int)
     parser.add_argument('--maxiter', default=1000, type=int)
@@ -105,19 +108,19 @@ if __name__ == "__main__":
     parser.add_argument('--update_interval', default=30, type=int)
     parser.add_argument('--tol', default=0.0001, type=float)
     
-    parser.add_argument('--word_emb', default='Word2Vec', 
+    parser.add_argument('--word_emb', default='HuggingFace', 
                         choices= ['Word2Vec', 'HuggingFace', 'Jose'])
     
-    parser.add_argument('--transform_emb', default=None, 
+    parser.add_argument('--transform_emb', default='SIF', 
                         choices= [None, 'SIF'])
     
-    parser.add_argument('--scaler', default=None, 
+    parser.add_argument('--scaler', default='MinMax', 
                         choices=[None, 'MinMax', 'Standard'])
     
     parser.add_argument('--norm', default=None,
                         choices=['l2', 'l1', 'max'])
     
-    parser.add_argument('--init', default='movMF-soft', 
+    parser.add_argument('--init', default='Kmeans', 
                         choices=['Kmeans', 'movMF-soft', 
                                  'SphericalKmeans', 'SphericalKmeans++'])
     
@@ -132,29 +135,31 @@ if __name__ == "__main__":
         # args.maxiter = 100
         # args.pretrain_epochs = 30
 
-        args.update_interval = 200
-        args.maxiter = 1200
-        args.pretrain_epochs = 30
+        args.update_interval=30
+        args.maxiter=300
+        args.pretrain_epochs=30
 
         args.dataset = 'datasets/SearchSnippets'
         args.save_dir = 'datasets/SearchSnippets/artefacts/'
 
     elif args.dataset == 'stackoverflow':
         args.update_interval = 500
-        args.maxiter = 1500
-        args.pretrain_epochs = 16
+        args.maxiter = 6000
+        args.pretrain_epochs = 15
 
         args.dataset = 'datasets/stackoverflow'
         args.save_dir = 'datasets/stackoverflow/artefacts/'
 
     elif args.dataset == 'biomedical':
+        # w2v
         # args.update_interval = 500
-        # args.pretrain_epochs = 30
-        # args.maxiter = 1500
+        # args.maxiter = 2500
+        # args.pretrain_epochs = 15
 
+        # huggingface
         args.update_interval = 500
-        args.pretrain_epochs = 30
-        args.maxiter = 1500
+        args.maxiter = 3000
+        args.pretrain_epochs = 50
 
         args.dataset = 'datasets/Biomedical'
         args.save_dir = 'datasets/Biomedical/artefacts/'
