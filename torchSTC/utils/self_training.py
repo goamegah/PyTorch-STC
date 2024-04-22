@@ -33,7 +33,7 @@ def self_train(model: STC,
     # instantiate evaluate class
     eval = Evaluate()
 
-    # Step 1: initialize cluster centers using k-means-like algorithm
+    # Stage 1: initialize cluster centers using k-means-like algorithm
     print(f'Initializing cluster centers with {args.init}.')
     z = model.partial_forward(x)
 
@@ -41,16 +41,25 @@ def self_train(model: STC,
                                     n_clusters=model.n_clusters, 
                                     kind=args.init)
     
+    y_pred = y_pred.detach().numpy()
     model.clustering_layer.init_clusters(torch.Tensor(clusters))
-    y_pred_last = np.copy(y_pred.detach().numpy())
 
     loss = 0
     index = 0
     index_array = np.arange(x.shape[0])
+
+    # Stage 2: jointly optimize the cluster centers and the network parameters
     for ite in range(int(args.maxiter)):
         if ite % args.update_interval == 0:
+            # compute all embeddings points 
+            # compute soft assignment probabilities q 
+            # update the target distribution p using the soft assignment probabilities q 
             q, p = model(x)
 
+            # save the last label assignment y_pred_last 
+            y_pred_last = np.copy(y_pred)
+
+            # compute new label assignment y_pred
             _, y_pred = q.max(1)
             y_pred = y_pred.detach().numpy()
             if y is not None:
@@ -59,23 +68,26 @@ def self_train(model: STC,
 
             # check stop criterion
             delta_label = np.sum(y_pred != y_pred_last).astype(np.float32) / y_pred.shape[0]
-            y_pred_last = np.copy(y_pred)
+
             if ite > 0 and delta_label < args.tol:
                 print('delta_label ', delta_label, '< tol ', args.tol)
                 print('Reached tolerance threshold. Stopping training.')
                 break
-
+        
+        # Choose a batch of samples S = {x_i} from x and their corresponding targets P = {p_i} from p 
         idx = index_array[index * args.batch_size: min((index + 1) * args.batch_size, x.shape[0])]
         x_batch = x[idx].clone().detach().float()
         p_batch = p[idx].clone().detach().float()
 
-        # Step 3: Forward pass
+        # update the cluster centers and the network parameters using the batch of samples S and their corresponding targets P 
+
+            # Step 3: Forward pass
         q_batch, _ = model(x_batch)
 
-        # Step 4: Compute the KL divergence loss
+            # Step 4: Compute the KL divergence loss
         loss = criterion(q_batch.log(), p_batch)
 
-        # Step 5: Backward pass
+            # Step 5: Backward pass
         optimizer.zero_grad()
         loss.backward()
         optimizer.step()
