@@ -64,7 +64,7 @@ class SpacePlot:
                     c = np.array(colors)[colLabels],
                     s = 3, edgecolors = "black", linewidth = 0.25,
                     marker = 'o')
-
+        plt.axis("off")
         plt.title("{} Self-training embeddings {} ({}|{})".format(data_name, reduction, comp[0], comp[1]))
         plt.tick_params(top='off', bottom='off', left='off', right='off', labelleft='off', labelbottom='off')
 

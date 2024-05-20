@@ -15,7 +15,6 @@ from tqdm import tqdm
 
 from torchSTC.models import AutoEncoder
 from torchSTC.modules import STC
-#from torchclust.metrics import metrics
 from torchSTC.utils.cluster import get_clusters
 from torchSTC.metrics import Evaluate
 
