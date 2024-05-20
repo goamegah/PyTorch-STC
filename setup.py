@@ -60,7 +60,7 @@ setup(
         'vis': ['umap-learn', 'matplotlib', 'tensorboardX']
     },
     packages=[p for p in find_packages() if p.startswith('torchSTC')],
-    # package_data={'torchclust': ['py.typed']},
+    # package_data={'torchSTC': ['py.typed']},
     include_package_data=True,
     license='MIT License',
     classifiers=[

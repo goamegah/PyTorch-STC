@@ -4,7 +4,7 @@ from spherecluster import VonMisesFisherMixture
 #from soyclustering import SphericalKMeans
 #from coclust.clustering.spherical_kmeans import SphericalKmeans
 from torchSTC.utils.spherical_kmeans import SphericalKmeans
-from torchSTC.utils.sphericalKmeans_optim import SphericalKMeans
+from torchSTC.utils.sphericalKmeans_optim import SphericalKMeans as SphericalKmeansPlus
 import torch
 
 
@@ -34,7 +34,7 @@ def get_clusters(x: torch.Tensor,
             return torch.Tensor(skmeans.centers), torch.Tensor(skmeans.labels_)
         
         elif kind == "SphericalKmeans++":
-            skmeanspp = SphericalKMeans(n_clusters=n_clusters)
+            skmeanspp = SphericalKmeansPlus(n_clusters=n_clusters)
             x = csr_matrix(x.detach().numpy())
             skmeanspp.fit(x)
             return torch.Tensor(skmeanspp.cluster_centers_), torch.Tensor(skmeanspp.labels_)
