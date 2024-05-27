@@ -28,5 +28,9 @@ Then, an auxiliary probability distribution P, stricter is computed that put mor
 
 ![Image of STC Arch](assets/3-JOFRCA.png)
 
+# Visualization
+
+![Image of STC Arch](assets/stc_viz.png)
+
 # Demo
 Follow this [demo](REQUIRED.md) to know how to run scripts.
